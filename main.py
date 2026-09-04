@@ -13,7 +13,7 @@ if "selected_noodle" not in st.session_state:
 if "speak_target" not in st.session_state:
     st.session_state.speak_target = None
 
-# 라면 데이터베이스 (짜파게티: 짜장 볶음라면 이미지 반영)
+# 라면 데이터베이스
 noodle_db = {
     "짜파게티": {
         "image": "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=800&auto=format&fit=crop&q=80",
@@ -57,20 +57,30 @@ noodle_db = {
     }
 }
 
-# 라면 카탈로그 출력 (4열 그리드)
-items = list(noodle_db.items())
-cols_per_row = 4
+# 🔍 검색 기능 추가
+search_query = st.text_input("🔍 라면 이름 또는 재료를 검색해보세요! (예: 치즈, 마늘, 비빔면)", "")
 
-for i in range(0, len(items), cols_per_row):
-    cols = st.columns(cols_per_row)
-    chunk = items[i:i + cols_per_row]
-    
-    for idx, (noodle_name, data) in enumerate(chunk):
-        with cols[idx]:
-            st.image(data["image"], caption=noodle_name, use_container_width=True)
-            if st.button(f"👉 {noodle_name} 선택", key=f"btn_{noodle_name}", use_container_width=True):
-                st.session_state.selected_noodle = noodle_name
-                st.session_state.speak_target = noodle_name
+# 검색어에 따른 필터링 (라면 이름 또는 추천 조합 재료 검색 가능)
+filtered_items = [
+    (name, data) for name, data in noodle_db.items()
+    if search_query.strip().lower() in name.lower() or search_query.strip().lower() in data["combination"].lower()
+]
+
+# 검색 결과 라면 카탈로그 출력
+if filtered_items:
+    cols_per_row = 4
+    for i in range(0, len(filtered_items), cols_per_row):
+        cols = st.columns(cols_per_row)
+        chunk = filtered_items[i:i + cols_per_row]
+        
+        for idx, (noodle_name, data) in enumerate(chunk):
+            with cols[idx]:
+                st.image(data["image"], caption=noodle_name, use_container_width=True)
+                if st.button(f"👉 {noodle_name} 선택", key=f"btn_{noodle_name}", use_container_width=True):
+                    st.session_state.selected_noodle = noodle_name
+                    st.session_state.speak_target = noodle_name
+else:
+    st.warning("🔍 검색 결과가 없습니다. 다른 라면 이름이나 재료를 검색해보세요!")
 
 # 브라우저 Web Speech API를 활용한 음성 재생
 if st.session_state.speak_target:
