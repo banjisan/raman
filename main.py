@@ -10,10 +10,10 @@ st.write("원하시는 라면 카드 아래 버튼을 누르면 추천 조합 �
 if "selected_noodle" not in st.session_state:
     st.session_state.selected_noodle = None
 
-# 라면 데이터베이스 (8종으로 확장)
+# 라면 데이터베이스 (8종 유지, 짜파게티 이미지 교체)
 noodle_db = {
     "짜파게티": {
-        "image": "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=500",
+        "image": "image_5a45c9.jpg",  # 첨부해주신 이미지 경로
         "combination": "트러플 오일 + 반숙 계란 후라이",
         "description": "반숙 노른자를 터뜨려 면과 섞은 뒤, 트러플 오일을 몇 방울 떨어뜨리면 고급 파스타 풍미가 완성됩니다."
     },
@@ -54,7 +54,7 @@ noodle_db = {
     }
 }
 
-# 라면 카탈로그 출력 ( 한 행에 4개씩 자동 그리드 배치 )
+# 라면 카탈로그 출력 (한 행에 4개씩 자동 그리드 배치)
 items = list(noodle_db.items())
 cols_per_row = 4
 
