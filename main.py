@@ -13,7 +13,7 @@ if "selected_noodle" not in st.session_state:
 if "speak_target" not in st.session_state:
     st.session_state.speak_target = None
 
-# 라면 데이터베이스
+# 라면 데이터베이스 (신라면에 업로드한 이미지 적용)
 noodle_db = {
     "짜파게티": {
         "image": "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=800&auto=format&fit=crop&q=80",
@@ -21,7 +21,7 @@ noodle_db = {
         "description": "반숙 노른자를 터뜨려 면과 섞은 뒤, 트러플 오일을 몇 방울 떨어뜨리면 고급 파스타 풍미가 완성됩니다."
     },
     "신라면": {
-        "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
+        "image": "shin.jpg",  # 👈 업로드하신 이미지를 app.py와 같은 폴더에 shin.jpg로 저장하여 사용하세요.
         "combination": "체다치즈 + 계란 노른자",
         "description": "매콤한 국물에 치즈가 녹아들어 부드럽고 녹진해지며, 계란 노른자로 고소함이 더해집니다."
     },
@@ -57,16 +57,16 @@ noodle_db = {
     }
 }
 
-# 🔍 검색 기능 추가
+# 🔍 검색 기능
 search_query = st.text_input("🔍 라면 이름 또는 재료를 검색해보세요! (예: 치즈, 마늘, 비빔면)", "")
 
-# 검색어에 따른 필터링 (라면 이름 또는 추천 조합 재료 검색 가능)
+# 검색어 필터링
 filtered_items = [
     (name, data) for name, data in noodle_db.items()
     if search_query.strip().lower() in name.lower() or search_query.strip().lower() in data["combination"].lower()
 ]
 
-# 검색 결과 라면 카탈로그 출력
+# 검색 결과 출력
 if filtered_items:
     cols_per_row = 4
     for i in range(0, len(filtered_items), cols_per_row):
@@ -82,7 +82,7 @@ if filtered_items:
 else:
     st.warning("🔍 검색 결과가 없습니다. 다른 라면 이름이나 재료를 검색해보세요!")
 
-# 브라우저 Web Speech API를 활용한 음성 재생
+# 음성 재생 Component
 if st.session_state.speak_target:
     target_name = st.session_state.speak_target
     tts_code = f"""
@@ -102,7 +102,7 @@ if st.session_state.speak_target:
 
 st.divider()
 
-# 선택된 라면 정보 및 상세 레시피 표시
+# 선택된 라면 상세 레시피 표시
 if st.session_state.selected_noodle:
     selected = st.session_state.selected_noodle
     info = noodle_db[selected]
