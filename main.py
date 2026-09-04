@@ -1,19 +1,22 @@
 import streamlit as st
+import streamlit.components.v1 as components
 
 # 페이지 설정
 st.set_page_config(page_title="라면 꿀조합 추천기", page_icon="🍜", layout="wide")
 
 st.title("🍜 라면 꿀조합 추천기")
-st.write("원하시는 라면 카드 아래 버튼을 누르면 추천 조합 상세 정보가 나타납니다.")
+st.write("원하시는 라면 카드 아래 버튼을 누르면 추천 조합 상세 정보와 음성 안내가 제공됩니다.")
 
-# 세션 상태 초기화 (클릭한 라면 기억)
+# 세션 상태 초기화
 if "selected_noodle" not in st.session_state:
     st.session_state.selected_noodle = None
+if "speak_target" not in st.session_state:
+    st.session_state.speak_target = None
 
-# 라면 데이터베이스 (8종 유지, 짜파게티 이미지 교체)
+# 라면 데이터베이스 (틈새라면 제외 총 7종)
 noodle_db = {
     "짜파게티": {
-        "image": "image_5a45c9.jpg",  # 첨부해주신 이미지 경로
+        "image": "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=500",
         "combination": "트러플 오일 + 반숙 계란 후라이",
         "description": "반숙 노른자를 터뜨려 면과 섞은 뒤, 트러플 오일을 몇 방울 떨어뜨리면 고급 파스타 풍미가 완성됩니다."
     },
@@ -42,11 +45,6 @@ noodle_db = {
         "combination": "계란 푼 국물 + 밥 한 공기",
         "description": "구수한 된장 베이스 국물이라 계란을 살살 풀어 끓인 뒤, 국물에 밥을 말아먹을 때 진가를 발휘합니다."
     },
-    "틈새라면": {
-        "image": "https://images.unsplash.com/photo-1547928576-a4a33237cbc3?w=500",
-        "combination": "콩나물 한 움큼 + 떡사리",
-        "description": "극강의 매운맛에 아삭한 콩나물 식감과 쫄깃한 떡을 추가하면 매운 짬뽕 스타일의 요리로 변신합니다."
-    },
     "팔도비빔면": {
         "image": "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=500",
         "combination": "대패삼겹살(또는 골뱅이) + 오이채",
@@ -67,6 +65,25 @@ for i in range(0, len(items), cols_per_row):
             st.image(data["image"], caption=noodle_name, use_container_width=True)
             if st.button(f"👉 {noodle_name} 선택", key=f"btn_{noodle_name}", use_container_width=True):
                 st.session_state.selected_noodle = noodle_name
+                st.session_state.speak_target = noodle_name
+
+# 선택된 라면에 따라 음성을 재생하는 자바스크립트 컴포넌트
+if st.session_state.speak_target:
+    target_name = st.session_state.speak_target
+    tts_code = f"""
+        <script>
+            if ('speechSynthesis' in window) {{
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance('{target_name}');
+                utterance.lang = 'ko-KR';
+                utterance.pitch = 1.4; // 톤을 높여 재미있는 목소리 연출
+                utterance.rate = 1.2;  # 신나는 속도
+                window.speechSynthesis.speak(utterance);
+            }}
+        </script>
+    """
+    components.html(tts_code, height=0)
+    st.session_state.speak_target = None
 
 st.divider()
 
@@ -77,14 +94,11 @@ if st.session_state.selected_noodle:
     
     st.subheader(f"✨ [{selected}] 꿀조합 상세보기")
     
-    # 2열 분할: [왼쪽 1 : 오른쪽 2 비율]
     col_left, col_right = st.columns([1, 2])
     
-    # 왼쪽: 라면 이미지
     with col_left:
         st.image(info["image"], caption=selected, use_container_width=True)
         
-    # 오른쪽: 꿀조합 상세 설명
     with col_right:
         st.markdown("### 🍯 추천 조합")
         st.success(f"**필요한 재료:** {info['combination']}")
