@@ -13,7 +13,7 @@ if "selected_noodle" not in st.session_state:
 if "speak_target" not in st.session_state:
     st.session_state.speak_target = None
 
-# 라면 데이터베이스 (틈새라면 제외 총 7종)
+# 라면 데이터베이스 (틈새라면 포함 총 8종)
 noodle_db = {
     "짜파게티": {
         "image": "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=500",
@@ -44,6 +44,11 @@ noodle_db = {
         "image": "https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?w=500",
         "combination": "계란 푼 국물 + 밥 한 공기",
         "description": "구수한 된장 베이스 국물이라 계란을 살살 풀어 끓인 뒤, 국물에 밥을 말아먹을 때 진가를 발휘합니다."
+    },
+    "틈새라면": {
+        "image": "https://images.unsplash.com/photo-1547928576-a4a33237cbc3?w=500",
+        "combination": "콩나물 한 움큼 + 떡사리",
+        "description": "극강의 매운맛에 아삭한 콩나물 식감과 쫄깃한 떡을 추가하면 매운 짬뽕 스타일의 요리로 변신합니다."
     },
     "팔도비빔면": {
         "image": "https://images.unsplash.com/photo-1585032226651-759b368d7246?w=500",
@@ -77,7 +82,7 @@ if st.session_state.speak_target:
                 const utterance = new SpeechSynthesisUtterance('{target_name}');
                 utterance.lang = 'ko-KR';
                 utterance.pitch = 1.4; // 톤을 높여 재미있는 목소리 연출
-                utterance.rate = 1.2;  # 신나는 속도
+                utterance.rate = 1.2;  // 신나는 속도
                 window.speechSynthesis.speak(utterance);
             }}
         </script>
