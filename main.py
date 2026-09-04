@@ -13,7 +13,7 @@ if "selected_noodle" not in st.session_state:
 if "speak_target" not in st.session_state:
     st.session_state.speak_target = None
 
-# 라면 데이터베이스 (고화질 음식 이미지 적용)
+# 라면 데이터베이스 (팔도비빔면 이미지를 비빔면/비빔국수 이미지로 수정)
 noodle_db = {
     "짜파게티": {
         "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
@@ -51,7 +51,7 @@ noodle_db = {
         "description": "극강의 매운맛에 아삭한 콩나물 식감과 쫄깃한 떡을 추가하면 매운 짬뽕 스타일의 요리로 변신합니다."
     },
     "팔도비빔면": {
-        "image": "https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?w=800&auto=format&fit=crop&q=80",
+        "image": "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=800&auto=format&fit=crop&q=80",
         "combination": "대패삼겹살(또는 골뱅이) + 오이채",
         "description": "매콤달콤한 비빔면 소스에 바삭하게 구운 대패삼겹살을 감싸 먹으면 조화가 완벽합니다."
     }
