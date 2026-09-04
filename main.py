@@ -13,7 +13,7 @@ if "selected_noodle" not in st.session_state:
 if "speak_target" not in st.session_state:
     st.session_state.speak_target = None
 
-# 라면 데이터베이스
+# 라면 데이터베이스 (기존 8종 + 신규 7종 추가)
 noodle_db = {
     "짜파게티": {
         "image": "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=800&auto=format&fit=crop&q=80",
@@ -54,6 +54,41 @@ noodle_db = {
         "image": "https://encrypted-tbn2.gstatic.com/licensed-image?q=tbn:ANd9GcTNExjSlIcPp-yPVjSF_h20fNib8-A_Nvc5_YXeL9Yhk8L7UfNuk49PJmjhxuLj336-5Wg_EROayB0zhVY",
         "combination": "대패삼겹살(또는 골뱅이) + 오이채",
         "description": "매콤달콤한 비빔면 소스에 바삭하게 구운 대패삼겹살을 감싸 먹으면 조화가 완벽합니다."
+    },
+    "신라면 블랙": {
+        "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
+        "combination": "모둠 버섯(표고/팽이) + 슬라이스 마늘",
+        "description": "사골 국물 베이스 특유의 진한 풍미에 쫄깃한 버섯과 알싸한 마늘 향이 어우러져 깊은 한식 보양식 맛을 냅니다."
+    },
+    "열라면": {
+        "image": "https://images.unsplash.com/photo-1617093727343-374698b1b08d?w=800&auto=format&fit=crop&q=80",
+        "combination": "순두부 반 모 + 계란 노른자 + 후추 팍팍",
+        "description": "원조 '열순두부' 조합! 화끈하고 칼칼한 국물에 순두부와 노른자가 더해져 부드럽고 매콤한 최강 조합을 자랑합니다."
+    },
+    "튀김우동": {
+        "image": "https://images.unsplash.com/photo-1618841557871-b468f3ade310?w=800&auto=format&fit=crop&q=80",
+        "combination": "어묵 꼬치 + 쑥갓 + 고춧가루 약간",
+        "description": "단짠 가쓰오부시 국물에 쫄깃한 어묵과 향긋한 쑥갓을 더하면 일식 우동 전문점 스타일로 업그레이드됩니다."
+    },
+    "육개장 사발면": {
+        "image": "https://images.unsplash.com/photo-1552611052-33e04de081de?w=800&auto=format&fit=crop&q=80",
+        "combination": "단무지 + 얇게 썬 청양고추",
+        "description": "얇고 쫄깃한 면발에 청양고추로 칼칼함을 살리고, 새콤한 단무지를 싸서 먹으면 분식집의 추억이 살아납니다."
+    },
+    "삼양라면": {
+        "image": "https://images.unsplash.com/photo-1547928576-a4a33237cbc3?w=800&auto=format&fit=crop&q=80",
+        "combination": "비엔나 소시지 + 케첩 한 티스푼",
+        "description": "특유의 부대찌개풍 육수에 칼집 낸 소시지를 넣으면 풍미가 살아나며, 케첩 살짝으로 입맛 당기는 국물이 됩니다."
+    },
+    "오징어짬뽕": {
+        "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
+        "combination": "냉동 오징어/새우 + 불맛 향미유(또는 고추기름)",
+        "description": "해산물을 추가하고 마지막에 고추기름을 살짝 두르면 중화요리집 불향 가득한 짬뽕 국물 완성!"
+    },
+    "꼬꼬면": {
+        "image": "https://images.unsplash.com/photo-1591814468924-caf88d1232e1?w=800&auto=format&fit=crop&q=80",
+        "combination": "닭가슴살 통조림 + 청양고추",
+        "description": "담백한 닭육수에 결대로 찢은 닭가슴살과 송송 썬 청양고추를 더해 깊고 맑으면서도 칼칼한 삼계탕 풍미를 냅니다."
     }
 }
 
