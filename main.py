@@ -18,7 +18,6 @@ if "selected_noodle" not in st.session_state:
 if "speak_target" not in st.session_state:
     st.session_state.speak_target = None
 
-# 🏆 [추가] 투표 데이터 세션 상태 초기화 (초기 기본 좋아요 수 설정)
 if "votes" not in st.session_state:
     st.session_state.votes = {
         "짜파게티": 120,
@@ -38,7 +37,6 @@ if "votes" not in st.session_state:
         "꼬꼬면": 45,
     }
 
-# 라면 데이터베이스 (총 15종)
 noodle_db = {
     "짜파게티": {
         "image": "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=800&auto=format&fit=crop&q=80",
@@ -147,7 +145,6 @@ noodle_db = {
     },
 }
 
-# 🔍 상단 검색 및 🎲 오늘 뭐 먹지? 기능
 col_search, col_random = st.columns([3, 1])
 
 with col_random:
@@ -164,11 +161,9 @@ with col_search:
         placeholder="🔍 라면 이름 또는 재료를 검색해보세요! (예: 치즈, 마늘, 비빔면)",
     )
 
-# 탭 구성 (추천 카탈로그 / 🏆 실시간 랭킹)
 tab1, tab2 = st.tabs(["🍜 전체 라면 목록", "🏆 명예의 전당 (꿀조합 랭킹)"])
 
 with tab1:
-    # 검색어 필터링
     filtered_items = [
         (name, data)
         for name, data in noodle_db.items()
@@ -176,7 +171,6 @@ with tab1:
         or search_query.strip().lower() in data["combination"].lower()
     ]
 
-    # 카탈로그 출력
     if filtered_items:
         cols_per_row = 4
         for i in range(0, len(filtered_items), cols_per_row):
@@ -203,7 +197,6 @@ with tab1:
                             st.session_state.selected_noodle = noodle_name
                             st.session_state.speak_target = noodle_name
                     with col_btn2:
-                        # 👍 투표 버튼
                         if st.button("👍", key=f"vote_{noodle_name}"):
                             st.session_state.votes[noodle_name] += 1
                             st.rerun()
@@ -214,16 +207,13 @@ with tab2:
     st.subheader("🏆 명예의 전당 (사용자 인기 꿀조합 랭킹)")
     st.write("사용자들이 직접 투표한 인기 꿀조합 순위입니다.")
 
-    # 투표수 기준으로 내림차순 정렬
     sorted_votes = sorted(
         st.session_state.votes.items(), key=lambda x: x[1], reverse=True
     )
 
-    # 랭킹 리스트 출력
     for rank, (noodle_name, vote_count) in enumerate(sorted_votes, start=1):
         info = noodle_db[noodle_name]
 
-        # 순위별 이모지 표시 (1~3위 강조)
         if rank == 1:
             rank_badge = "🥇 1위"
         elif rank == 2:
@@ -259,25 +249,46 @@ with tab2:
 
         st.divider()
 
-# 음성 재생 (Web Speech API)
+# 🗣️ [개선] 더욱 자연스럽고 기계음이 적은 사람 목소리로 TTS 설정
 if st.session_state.speak_target:
     target_name = st.session_state.speak_target
     tts_code = f"""
         <script>
             if ('speechSynthesis' in window) {{
                 window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance('{target_name}');
-                utterance.lang = 'ko-KR';
-                utterance.pitch = 1.4;
-                utterance.rate = 1.2;
-                window.speechSynthesis.speak(utterance);
+                const text = '{target_name} 추천 조합입니다.';
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                // 음성 비동기 로드 대응 및 사람 목소리에 가까운 고품질 보이스 검색
+                const speakWithVoice = () => {{
+                    const voices = window.speechSynthesis.getVoices();
+                    
+                    // 한국어 보이스 중 자연스러운 프리미엄/고품질 음성 우선 선택
+                    const korVoice = voices.find(v => v.lang.includes('ko') && (v.name.includes('Google') || v.name.includes('Yuna') || v.name.includes('Natural') || v.name.includes('Neural'))) 
+                                  || voices.find(v => v.lang.includes('ko'));
+                    
+                    if (korVoice) {{
+                        utterance.voice = korVoice;
+                    }}
+                    
+                    utterance.lang = 'ko-KR';
+                    utterance.pitch = 1.0;  // 톤을 낮추어 자연스러운 사람 목소리 표현 (기존 1.4 -> 1.0)
+                    utterance.rate = 0.95;  // 말하는 속도를 템포에 맞춰 약간 천천히 조율 (기존 1.2 -> 0.95)
+                    
+                    window.speechSynthesis.speak(utterance);
+                }};
+
+                if (window.speechSynthesis.getVoices().length !== 0) {{
+                    speakWithVoice();
+                }} else {{
+                    window.speechSynthesis.onvoiceschanged = speakWithVoice;
+                }}
             }}
         </script>
     """
     components.html(tts_code, height=0)
     st.session_state.speak_target = None
 
-# 선택된 라면 상세 페이지
 if st.session_state.selected_noodle:
     selected = st.session_state.selected_noodle
     info = noodle_db[selected]
@@ -304,7 +315,6 @@ if st.session_state.selected_noodle:
 
 st.divider()
 
-# 나만의 꿀조합 제보 폼
 with st.expander("➕ 나만의 꿀조합 제보하기"):
     with st.form("recipe_form"):
         user_noodle = st.text_input("라면 이름")
