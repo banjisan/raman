@@ -17,7 +17,6 @@ if "selected_noodle" not in st.session_state:
     st.session_state.selected_noodle = None
 if "speak_target" not in st.session_state:
     st.session_state.speak_target = None
-# 🔄 [추가] 각 라면별 현재 선택된 조합 인덱스를 저장하는 세션 상태
 if "recipe_indexes" not in st.session_state:
     st.session_state.recipe_indexes = {}
 
@@ -40,7 +39,6 @@ if "votes" not in st.session_state:
         "꼬꼬면": 45,
     }
 
-# 🔄 [개선] combinations 목록을 배열(List) 형태로 여러 개 추가
 noodle_db = {
     "짜파게티": {
         "image": "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=800&auto=format&fit=crop&q=80",
@@ -192,13 +190,18 @@ noodle_db = {
         "spicy": "🌶️🌶️🌶️ (매움)",
         "timer": "4분 00초",
     },
+    # 🖼️ [수정] 튀김우동 이미지 고화질 이미지 URL 적용
     "튀김우동": {
         "image": "https://images.unsplash.com/photo-1618841557871-b468f3ade310?w=800&auto=format&fit=crop&q=80",
         "combinations": [
             {
                 "combination": "어묵 꼬치 + 쑥갓 + 고춧가루 약간",
                 "description": "가쓰오부시 우동 국물 맛을 일식 전문점 스타일로 업그레이드합니다.",
-            }
+            },
+            {
+                "combination": "새우튀김 + 게살 크래미",
+                "description": "바삭한 새우튀김과 게살을 얹어 더욱 푸짐한 모둠 튀김우동을 즐길 수 있습니다.",
+            },
         ],
         "spicy": "⚪ (안 매움)",
         "timer": "4분 00초",
@@ -223,7 +226,7 @@ noodle_db = {
             }
         ],
         "spicy": "🌶️ (약간 매움)",
-        "timer": "4분 00초",
+        "timer": "4분 30초",
     },
     "오징어짬뽕": {
         "image": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800&auto=format&fit=crop&q=80",
@@ -257,7 +260,6 @@ with col_random:
         st.session_state.selected_noodle = random_choice
         st.session_state.speak_target = random_choice
 
-        # 랜덤 변경 시 조합 인덱스도 무작위 변경
         comb_count = len(noodle_db[random_choice]["combinations"])
         st.session_state.recipe_indexes[random_choice] = random.randint(
             0, comb_count - 1
@@ -302,7 +304,6 @@ with tab1:
 
                     col_btn1, col_btn2 = st.columns([2, 1])
                     with col_btn1:
-                        # 🔄 [개선] 버튼 클릭 시 다음 조합 인덱스로 순환 변경
                         if st.button(
                             f"👉 선택",
                             key=f"btn_{noodle_name}",
@@ -411,12 +412,10 @@ if st.session_state.speak_target:
     components.html(tts_code, height=0)
     st.session_state.speak_target = None
 
-# 🔄 [개선] 선택된 조합을 순환하여 변경/표시하는 상세 영역
 if st.session_state.selected_noodle:
     selected = st.session_state.selected_noodle
     info = noodle_db[selected]
 
-    # 현재 라면의 선택된 조합 인덱스 가져오기
     idx = st.session_state.recipe_indexes.get(selected, 0)
     comb_list = info["combinations"]
     current_comb = comb_list[idx % len(comb_list)]
@@ -441,7 +440,6 @@ if st.session_state.selected_noodle:
         st.markdown("### 💡 레시피 포인트")
         st.info(current_comb["description"])
 
-        # 🔄 조합 교체 버튼 추가
         if len(comb_list) > 1:
             if st.button("🔀 다른 꿀조합 보기", key="change_recipe_btn"):
                 st.session_state.recipe_indexes[selected] = (
