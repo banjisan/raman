@@ -18,7 +18,27 @@ if "selected_noodle" not in st.session_state:
 if "speak_target" not in st.session_state:
     st.session_state.speak_target = None
 
-# 라면 데이터베이스 (기존 8종 + 이전 추가 7종 = 총 15종 및 부가 정보 포함)
+# 🏆 [추가] 투표 데이터 세션 상태 초기화 (초기 기본 좋아요 수 설정)
+if "votes" not in st.session_state:
+    st.session_state.votes = {
+        "짜파게티": 120,
+        "신라면": 95,
+        "불닭볶음면": 150,
+        "너구리": 80,
+        "진라면(매운맛)": 110,
+        "안성탕면": 65,
+        "틈새라면": 70,
+        "팔도비빔면": 130,
+        "신라면 블랙": 85,
+        "열라면": 140,
+        "튀김우동": 60,
+        "육개장 사발면": 75,
+        "삼양라면": 50,
+        "오징어짬뽕": 55,
+        "꼬꼬면": 45,
+    }
+
+# 라면 데이터베이스 (총 15종)
 noodle_db = {
     "짜파게티": {
         "image": "https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=800&auto=format&fit=crop&q=80",
@@ -144,39 +164,102 @@ with col_search:
         placeholder="🔍 라면 이름 또는 재료를 검색해보세요! (예: 치즈, 마늘, 비빔면)",
     )
 
-# 검색어에 따른 필터링
-filtered_items = [
-    (name, data)
-    for name, data in noodle_db.items()
-    if search_query.strip().lower() in name.lower()
-    or search_query.strip().lower() in data["combination"].lower()
-]
+# 탭 구성 (추천 카탈로그 / 🏆 실시간 랭킹)
+tab1, tab2 = st.tabs(["🍜 전체 라면 목록", "🏆 명예의 전당 (꿀조합 랭킹)"])
 
-# 카탈로그 출력 (4열)
-if filtered_items:
-    cols_per_row = 4
-    for i in range(0, len(filtered_items), cols_per_row):
-        cols = st.columns(cols_per_row)
-        chunk = filtered_items[i : i + cols_per_row]
+with tab1:
+    # 검색어 필터링
+    filtered_items = [
+        (name, data)
+        for name, data in noodle_db.items()
+        if search_query.strip().lower() in name.lower()
+        or search_query.strip().lower() in data["combination"].lower()
+    ]
 
-        for idx, (noodle_name, data) in enumerate(chunk):
-            with cols[idx]:
-                st.image(
-                    data["image"], caption=noodle_name, use_container_width=True
-                )
-                if st.button(
-                    f"👉 {noodle_name} 선택",
-                    key=f"btn_{noodle_name}",
-                    use_container_width=True,
-                ):
-                    st.session_state.selected_noodle = noodle_name
-                    st.session_state.speak_target = noodle_name
-else:
-    st.warning(
-        "🔍 검색 결과가 없습니다. 다른 라면 이름이나 재료를 검색해보세요!"
+    # 카탈로그 출력
+    if filtered_items:
+        cols_per_row = 4
+        for i in range(0, len(filtered_items), cols_per_row):
+            cols = st.columns(cols_per_row)
+            chunk = filtered_items[i : i + cols_per_row]
+
+            for idx, (noodle_name, data) in enumerate(chunk):
+                with cols[idx]:
+                    st.image(
+                        data["image"],
+                        caption=noodle_name,
+                        use_container_width=True,
+                    )
+                    vote_count = st.session_state.votes.get(noodle_name, 0)
+                    st.caption(f"👍 추천수: **{vote_count}**표")
+
+                    col_btn1, col_btn2 = st.columns([2, 1])
+                    with col_btn1:
+                        if st.button(
+                            f"👉 선택",
+                            key=f"btn_{noodle_name}",
+                            use_container_width=True,
+                        ):
+                            st.session_state.selected_noodle = noodle_name
+                            st.session_state.speak_target = noodle_name
+                    with col_btn2:
+                        # 👍 투표 버튼
+                        if st.button("👍", key=f"vote_{noodle_name}"):
+                            st.session_state.votes[noodle_name] += 1
+                            st.rerun()
+    else:
+        st.warning("🔍 검색 결과가 없습니다.")
+
+with tab2:
+    st.subheader("🏆 명예의 전당 (사용자 인기 꿀조합 랭킹)")
+    st.write("사용자들이 직접 투표한 인기 꿀조합 순위입니다.")
+
+    # 투표수 기준으로 내림차순 정렬
+    sorted_votes = sorted(
+        st.session_state.votes.items(), key=lambda x: x[1], reverse=True
     )
 
-# 브라우저 Web Speech API를 활용한 음성 재생
+    # 랭킹 리스트 출력
+    for rank, (noodle_name, vote_count) in enumerate(sorted_votes, start=1):
+        info = noodle_db[noodle_name]
+
+        # 순위별 이모지 표시 (1~3위 강조)
+        if rank == 1:
+            rank_badge = "🥇 1위"
+        elif rank == 2:
+            rank_badge = "🥈 2위"
+        elif rank == 3:
+            rank_badge = "🥉 3위"
+        else:
+            rank_badge = f"**{rank}위**"
+
+        with st.container():
+            col_rank, col_img, col_info, col_vote = st.columns([1, 1.5, 4, 1.5])
+
+            with col_rank:
+                st.markdown(f"### {rank_badge}")
+
+            with col_img:
+                st.image(info["image"], use_container_width=True)
+
+            with col_info:
+                st.markdown(f"#### {noodle_name}")
+                st.write(f"🍯 **조합:** {info['combination']}")
+                st.caption(f"💡 {info['description']}")
+
+            with col_vote:
+                st.metric("투표수", f"{vote_count}표")
+                if st.button(
+                    "👍 투표하기",
+                    key=f"rank_vote_{noodle_name}",
+                    use_container_width=True,
+                ):
+                    st.session_state.votes[noodle_name] += 1
+                    st.rerun()
+
+        st.divider()
+
+# 음성 재생 (Web Speech API)
 if st.session_state.speak_target:
     target_name = st.session_state.speak_target
     tts_code = f"""
@@ -194,9 +277,7 @@ if st.session_state.speak_target:
     components.html(tts_code, height=0)
     st.session_state.speak_target = None
 
-st.divider()
-
-# 선택된 라면 상세 보기
+# 선택된 라면 상세 페이지
 if st.session_state.selected_noodle:
     selected = st.session_state.selected_noodle
     info = noodle_db[selected]
@@ -211,14 +292,15 @@ if st.session_state.selected_noodle:
     with col_right:
         st.write(f"🔥 **맵기 단계:** {info.get('spicy', '정보 없음')}")
         st.write(f"⏱️ **권장 조리시간:** {info.get('timer', '정보 없음')}")
+        st.write(
+            f"👍 **현재 추천수:** {st.session_state.votes.get(selected, 0)}표"
+        )
 
         st.markdown("### 🍯 추천 조합")
         st.success(f"**필요한 재료:** {info['combination']}")
 
         st.markdown("### 💡 레시피 포인트")
         st.info(info["description"])
-else:
-    st.info("👆 위 라면 카탈로그에서 원하시는 라면의 버튼을 눌러보세요!")
 
 st.divider()
 
